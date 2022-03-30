@@ -13,20 +13,22 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '17'
-      - name: Generate tag
+      - name: Extract maven version
         run: echo ::set-output name=tag::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
         id: project
-      - name: Generate tag
+      - name: Get date
         run: echo ::set-output name=value::$(date +'%Y%m%d.%H%M%S')
         id: timestamp
-      - name: Tag of exeercice 1
+# This is the most complex way of doing it. But it works
+# To use this form call it with ${{steps.exercice.outputs.version}}
+      - name: Tag of exercice 1
         run: echo ::set-output name=version::$(A=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout) ; B=$(date +'%Y%m%d.%H%M%S') ; echo $A"-"$B)
         id: exercice
       - name: Run tests
         run: mvn test
       - name: Generate Docker image
-        run: mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.exercice.outputs.version}}
+        run: mvn spring-boot:build-image -DskipTests -Dspring-boot.build-image.imageName=${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.project.outputs.tag}}-${{steps.timestamp.outputs.value}}
       - name: Login to DockerHub
         run: docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}" 
       - name: Push image to DockerHub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.exercice.outputs.version}}
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.project.outputs.tag}}-${{steps.timestamp.outputs.value}}
