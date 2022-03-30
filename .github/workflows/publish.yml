@@ -22,5 +22,8 @@ jobs:
       - name: Generate tag
         run: echo ::set-output name=tag::$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
         id: project
+      - name: Generate tag
+        run: echo ::set-output name=value::$(date +'%Y%m%d.%H%M%S')
+        id: timestamp
       - name: Push image to DockerHub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.project.outputs.tag}}
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/items:${{steps.timestamp.outputs.value}}
