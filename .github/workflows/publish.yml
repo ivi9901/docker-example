@@ -23,6 +23,7 @@ jobs:
 # To use this form call it with ${{steps.exercice.outputs.version}}
       - name: Tag of exercice 1
         run: echo ::set-output name=version::$(A=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout) ; B=$(date +'%Y%m%d.%H%M%S') ; echo $A"-"$B)
+        # Other way: echo $(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)"-"$(date +'%Y%m%d.%H%M%S')
         id: exercice
       - name: Run tests
         run: mvn test
